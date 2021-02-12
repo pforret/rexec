@@ -42,6 +42,46 @@ main() {
   run)
     #TIP: use «$script_prefix run 'command -flag parameters'» to repeat the command
     #TIP:> $script_prefix run 'ping -c 1 www.website.com'
+    do_run
+    ;;
+
+  file)
+    #TIP: use «$script_prefix file /path/file.txt» to repeatedly check the file
+    #TIP:> $script_prefix -d file /var/log/errors.log
+    do_file
+    ;;
+
+  check|env)
+    ## leave this default action, it will make it easier to test your script
+    #TIP: use «$script_prefix check» to check if this script is ready to execute and what values the options/flags are
+    #TIP:> $script_prefix check
+    #TIP: use «$script_prefix env» to generate an example .env file
+    #TIP:> $script_prefix env > .env
+    check_script_settings
+    ;;
+
+  update)
+    ## leave this default action, it will make it easier to test your script
+    #TIP: use «$script_prefix update» to update to the latest version
+    #TIP:> $script_prefix check
+    update_script_to_latest
+    ;;
+
+  *)
+    die "action [$action] not recognized"
+    ;;
+  esac
+  log_to_file "[$script_basename] ended after $SECONDS secs"
+  #TIP: >>> bash script created with «pforret/bashew»
+  #TIP: >>> for bash development, also check out «pforret/setver» and «pforret/progressbar»
+}
+
+#####################################################################
+## Put your helper scripts here
+#####################################################################
+
+do_run() {
+  log_to_file "run [$command]"
     i=0
     # shellcheck disable=SC2154
     user=$(whoami)
@@ -78,15 +118,14 @@ main() {
       progress "Ran [$command] (#$i/$number @ $SECONDS secs) - wait $wait seconds"
       sleep "$wait"
     done
-    ;;
+}
 
-  file)
-    #TIP: use «$script_prefix file /path/file.txt» to repeatedly check the file
-    #TIP:> $script_prefix -d file /var/log/errors.log
+do_file() {
     i=0
     user=$(whoami)
     # shellcheck disable=SC2154
     file="$command"
+    log_to_file "file [$file]"
     id=$(echo "$user@$HOSTNAME $file" | hash 10)
     debug "ID for this file: $id"
     tmp_output="$tmp_dir/$script_prefix.$id.compare.txt"
@@ -118,45 +157,6 @@ main() {
       progress "Check [$command] (#$i/$number @ $SECONDS secs) - wait $wait seconds"
       sleep "$wait"
     done
-    ;;
-
-  check|env)
-    ## leave this default action, it will make it easier to test your script
-    #TIP: use «$script_prefix check» to check if this script is ready to execute and what values the options/flags are
-    #TIP:> $script_prefix check
-    #TIP: use «$script_prefix env» to generate an example .env file
-    #TIP:> $script_prefix env > .env
-    check_script_settings
-    ;;
-
-  update)
-    ## leave this default action, it will make it easier to test your script
-    #TIP: use «$script_prefix update» to update to the latest version
-    #TIP:> $script_prefix check
-    update_script_to_latest
-    ;;
-
-  *)
-    die "action [$action] not recognized"
-    ;;
-  esac
-  log_to_file "[$script_basename] ended after $SECONDS secs"
-  #TIP: >>> bash script created with «pforret/bashew»
-  #TIP: >>> for bash development, also check out «pforret/setver» and «pforret/progressbar»
-}
-
-#####################################################################
-## Put your helper scripts here
-#####################################################################
-
-do_action1() {
-  log_to_file "action1 [$input]"
-  # < "$1"  do_action1_stuff
-}
-
-do_action2() {
-  log_to_file "action2 [$input] -> [$output]"
-  # < "$1"  do_action2_stuff > "$2"
 }
 
 
