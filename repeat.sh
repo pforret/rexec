@@ -1,12 +1,4 @@
 #!/usr/bin/env bash
-### ==============================================================================
-### SO HOW DO YOU PROCEED WITH YOUR SCRIPT?
-### 1. define the options/parameters and defaults you need in list_options()
-### 2. define dependencies on other programs/scripts in list_dependencies()
-### 3. implement the different actions in main() with helper functions
-### 4. implement helper functions you defined in previous step
-### ==============================================================================
-
 ### Created by Peter Forret ( pforret ) on 2021-02-12
 ### Based on https://github.com/pforret/bashew 1.14.0
 script_version="0.0.1" # if there is a VERSION.md in this script's folder, it will take priority for version number
@@ -15,55 +7,25 @@ readonly script_created="2021-02-12"
 readonly run_as_root=-1 # run_as_root: 0 = don't check anything / 1 = script MUST run as root / -1 = script MAY NOT run as root
 
 list_options() {
-  ### Change the next lines to reflect which flags/options/parameters you need
-  ### flag:   switch a flag 'on' / no value specified
-  ###     flag|<short>|<long>|<description>
-  ###     e.g. "-v" or "--verbose" for verbose output / default is always 'off'
-  ###     will be available as $<long> in the script e.g. $verbose
-  ### option: set an option / 1 value specified
-  ###     option|<short>|<long>|<description>|<default>
-  ###     e.g. "-e <extension>" or "--extension <extension>" for a file extension
-  ###     will be available a $<long> in the script e.g. $extension
-  ### list: add an list/array item / 1 value specified
-  ###     list|<short>|<long>|<description>| (default is ignored)
-  ###     e.g. "-u <user1> -u <user2>" or "--user <user1> --user <user2>"
-  ###     will be available a $<long> array in the script e.g. ${user[@]}
-  ### param:  comes after the options
-  ###     param|<type>|<long>|<description>
-  ###     <type> = 1 for single parameters - e.g. param|1|output expects 1 parameter <output>
-  ###     <type> = ? for optional parameters - e.g. param|1|output expects 1 parameter <output>
-  ###     <type> = n for list parameter    - e.g. param|n|inputs expects <input1> <input2> ... <input99>
-  ###     will be available as $<long> in the script after option/param parsing
   echo -n "
-#commented lines will be filtered
+flag|d|diff|diff the change in output instead of just showing the new output
+flag|e|erase|erase last output (first call always shows up)
+flag|f|force|do not ask for confirmation (always yes)
 flag|h|help|show usage
 flag|q|quiet|no output
 flag|v|verbose|output more
-flag|f|force|do not ask for confirmation (always yes)
 option|l|log_dir|folder for log files |$HOME/log/$script_prefix
 option|t|tmp_dir|folder for temp files|.tmp
-#option|w|width|width to use|800
-#list|u|user|user(s) to execute this for
-param|1|action|action to perform: analyze/convert
-param|?|input|input file
-param|?|output|output file
+option|n|number|number of times to repeat the command|100
+option|w|wait|seconds to wait between repeating the command|5
+param|1|action|action to perform: run/file
+param|?|command|command to repeat
 " | grep -v '^#' | grep -v '^\s*$'
 }
 
 list_dependencies() {
-  ### Change the next lines to reflect which binaries(programs) or scripts are necessary to run this script
-  # Example 1: a regular package that should be installed with apt/brew/yum/...
-  #curl
-  # Example 2: a program that should be installed with apt/brew/yum/... through a package with a different name
-  #convert|imagemagick
-  # Example 3: a package with its own package manager: basher (shell), go get (golang), cargo (Rust)...
-  #progressbar|basher install pforret/progressbar
   echo -n "
 gawk
-curl
-#ffmpeg
-#convert|imagemagick
-#progressbar|basher install pforret/progressbar
 " | grep -v "^#" | grep -v '^\s*$'
 }
 
@@ -77,18 +39,85 @@ main() {
 
   action=$(lower_case "$action")
   case $action in
-  action1)
-    #TIP: use «$script_prefix action1» to ...
-    #TIP:> $script_prefix action1 input.txt
+  run)
+    #TIP: use «$script_prefix run 'command -flag parameters'» to repeat the command
+    #TIP:> $script_prefix run 'ping -c 1 www.website.com'
+    i=0
     # shellcheck disable=SC2154
-    do_action1 "$input"
+    user=$(whoami)
+    id=$(echo "$user@$HOSTNAME $command" | hash 10)
+    debug "ID for this command: $id"
+    tmp_output="$tmp_dir/$script_prefix.$id.compare.txt"
+    # shellcheck disable=SC2154
+    [[ $erase -gt 0 ]] && rm -f "$tmp_output"
+    [[ ! -f "$tmp_output" ]] && touch "$tmp_output"
+    hash_output=$(< "$tmp_output" hash 16)
+
+    tmp_latest="$tmp_dir/$script_prefix.$id.latest.txt"
+    # shellcheck disable=SC2154
+    while [[ $i -lt $number ]] ; do
+      i=$((i + 1))
+      progress "Run [$command] (#$i/$number @ $SECONDS secs)"
+      eval "$command &> '$tmp_latest'"
+      hash_latest=$(< "$tmp_latest" hash 16)
+      if [[ ! "$hash_latest" == "$hash_output" ]] ; then
+        tput bel
+        echo "   "
+        out "$col_ylw### Output changed at $(date)$col_reset"
+        if [[ $diff -eq 0 ]] ; then
+          out "$col_ylw### NEW OUTPUT$col_reset"
+          cat "$tmp_latest"
+        else
+          out "$col_ylw### OUTPUT DIFF$col_reset"
+          diff "$tmp_latest" "$tmp_output"
+        fi
+        out "$col_ylw###$col_reset"
+        cp "$tmp_latest" "$tmp_output"
+        hash_output="$hash_latest"
+      fi
+      progress "Ran [$command] (#$i/$number @ $SECONDS secs) - wait $wait seconds"
+      sleep "$wait"
+    done
     ;;
 
-  action2)
-    #TIP: use «$script_prefix action2» to ...
-    #TIP:> $script_prefix action2 input.txt output.pdf
+  file)
+    #TIP: use «$script_prefix file /path/file.txt» to repeatedly check the file
+    #TIP:> $script_prefix -d file /var/log/errors.log
+    i=0
+    user=$(whoami)
     # shellcheck disable=SC2154
-    do_action2 "$input" "$output"
+    file="$command"
+    id=$(echo "$user@$HOSTNAME $file" | hash 10)
+    debug "ID for this file: $id"
+    tmp_output="$tmp_dir/$script_prefix.$id.compare.txt"
+    # shellcheck disable=SC2154
+    [[ $erase -gt 0 ]] && rm -f "$tmp_output"
+    [[ ! -f "$tmp_output" ]] && cp "$file" "$tmp_output"
+    hash_output=$(< "$tmp_output" hash 16)
+
+    # shellcheck disable=SC2154
+    while [[ $i -lt $number ]] ; do
+      i=$((i + 1))
+      progress "Check [$file] (#$i/$number @ $SECONDS secs)"
+      hash_latest=$(< "$file" hash 16)
+      if [[ ! "$hash_latest" == "$hash_output" ]] ; then
+        tput bel
+        echo "   "
+        out "$col_ylw### File changed at $(date)$col_reset"
+        if [[ $diff -eq 0 ]] ; then
+          out "$col_ylw### NEW FILE$col_reset"
+          cat "$file"
+        else
+          out "$col_ylw### FILE DIFF$col_reset"
+          diff "$file" "$tmp_output"
+        fi
+        out "$col_ylw###$col_reset"
+        cp "$file" "$tmp_output"
+        hash_output="$hash_latest"
+      fi
+      progress "Check [$command] (#$i/$number @ $SECONDS secs) - wait $wait seconds"
+      sleep "$wait"
+    done
     ;;
 
   check|env)
