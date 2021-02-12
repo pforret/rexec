@@ -80,7 +80,6 @@ Address: 188.166.1.1
 ```bash
 > repeat -d file /var/log/results.txt
      Check [/var/log/results.txt] (#5/100 @ 21 secs)
-### Output changed at Fri Feb 12 15:36:28 CET 2021
 ### File changed at Fri Feb 12 16:09:13 CET 2021
 ### FILE DIFF
 5d4
