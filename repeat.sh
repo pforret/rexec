@@ -81,12 +81,14 @@ main() {
 #####################################################################
 
 do_run() {
-  log_to_file "run [$command]"
+    # shellcheck disable=SC2154
+    log_to_file "run [$command]"
     i=0
     # shellcheck disable=SC2154
     user=$(whoami)
     id=$(echo "$user@$HOSTNAME $command" | hash 10)
     debug "ID for this command: $id"
+    # shellcheck disable=SC2154
     tmp_output="$tmp_dir/$script_prefix.$id.compare.txt"
     # shellcheck disable=SC2154
     [[ $erase -gt 0 ]] && rm -f "$tmp_output"
