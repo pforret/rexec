@@ -8,7 +8,8 @@
 
 # repeat
 
-repeat a command and be alerted when the output changes
+![pforret/repeat](assets/repeat.jpg)
+check a command/file repeatedly and be alerted when the output changes
 
 ## 🚀 Installation
 
