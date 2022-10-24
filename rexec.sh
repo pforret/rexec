@@ -73,14 +73,14 @@ Script:main() {
   action=$(Str:lower "$action")
   case $action in
   run)
-    #TIP: use «$script_prefix run» to ...
-    #TIP:> $script_prefix run
+    #TIP: use «$script_prefix run» to wait until the output of a command changes
+    #TIP:> $script_prefix run "nslookup www.newdomain.com"
     do_run
     ;;
 
   file)
-    #TIP: use «$script_prefix file» to ...
-    #TIP:> $script_prefix file
+    #TIP: use «$script_prefix file» to wait until file contents changes
+    #TIP:> $script_prefix file /var/log/errors.log
     do_file
     ;;
 

@@ -26,35 +26,37 @@ or with `git`
 ## 🔥 Usage
 
 ```
-Program: repeat 1.0.0 by peter@forret.com
-Updated: Feb 12 15:49:50 2021
-Description: repeat a command and be alerted when the output changes
-Usage: repeat [-d] [-e] [-f] [-h] [-q] [-v] [-l <log_dir>] [-t <tmp_dir>] [-n <number>] [-w <wait>] <action> <command?>
+Program : rexec.sh  by peter@forret.com
+Version : v1.1.0 (2022-10-24 21:59)
+Purpose : reapeat and observe changes
+Usage   : rexec.sh [-h] [-q] [-v] [-f] [-d] [-e] [-l <log_dir>] [-t <tmp_dir>] [-n <number>] [-w <wait>] <action> <command?>
 Flags, options and parameters:
-    -d|--diff        : [flag] diff the change in output instead of just showing the new output [default: off]
-    -e|--erase       : [flag] erase last output (first call always shows up) [default: off]
-    -f|--force       : [flag] do not ask for confirmation (always yes) [default: off]
     -h|--help        : [flag] show usage [default: off]
     -q|--quiet       : [flag] no output [default: off]
-    -v|--verbose     : [flag] output more [default: off]
-    -l|--log_dir <?> : [option] folder for log files   [default: /Users/pforret/log/repeat]
-    -t|--tmp_dir <?> : [option] folder for temp files  [default: .tmp]
-    -n|--number <?>  : [option] number of times to repeat the command  [default: 100]
+    -v|--verbose     : [flag] also show debug messages [default: off]
+    -f|--force       : [flag] do not ask for confirmation (always yes) [default: off]
+    -d|--diff        : [flag] diff the change in output instead of just showing the new output [default: off]
+    -e|--erase       : [flag] erase last output (first call always shows up) [default: off]
+    -l|--log_dir <?> : [option] folder for log files   [default: /home/pforret/log/rexec]
+    -t|--tmp_dir <?> : [option] folder for temp files  [default: /tmp/rexec]
+    -n|--number <?>  : [option] number of times to repeat the command  [default: 1000]
     -w|--wait <?>    : [option] seconds to wait between repeating the command  [default: 5]
-    <action>         : [parameter] action to perform: run/file
+    <action>         : [choice] action to perform  [options: run,file,check,env,update]
     <command>        : [parameter] command to repeat (optional)
-                                  @github.com:pforret/repeat.git                                             
+                                  @github.com:pforret/rexec.git
 ### TIPS & EXAMPLES
-* use repeat run 'command -flag parameters' to repeat the command
-  repeat run 'ping -c 1 www.website.com'
-* use repeat file /path/file.txt to repeatedly check the file
-  repeat -d file /var/log/errors.log
-* use repeat check to check if this script is ready to execute and what values the options/flags are
-  repeat check
-* use repeat env to generate an example .env file
-  repeat env > .env
-* use repeat update to update to the latest version
-  repeat update
+* use rexec run to wait until the output of a command changes
+  rexec run "nslookup www.newdomain.com"
+* use rexec file to wait until file contents changes
+  rexec file /var/log/errors.log
+* use rexec check to check if this script is ready to execute and what values the options/flags are
+  rexec check
+* use rexec env to generate an example .env file
+  rexec env > .env
+* use rexec update to update to the latest version
+  rexec update
+* >>> bash script created with pforret/bashew
+* >>> for bash development, also check IO:print pforret/setver and pforret/IO:progressbar
 ```
 ## 🔁 Examples
 
