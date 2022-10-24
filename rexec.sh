@@ -172,7 +172,7 @@ do_file() {
     # shellcheck disable=SC2154
     while [[ $i -lt $number ]] ; do
       i=$((i + 1))
-      progress "Check [$file] (#$i/$number @ $SECONDS secs)"
+      IO:progress "Check [$file] (#$i/$number @ $SECONDS secs)"
       hash_latest=$(< "$file" Str:digest 16)
       if [[ ! "$hash_latest" == "$hash_output" ]] ; then
         tput bel
