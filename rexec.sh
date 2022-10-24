@@ -599,7 +599,7 @@ Script:check() {
 Option:usage() {
   IO:print "Program : ${txtInfo}$script_basename${txtReset}  by ${txtWarn}$script_author${txtReset}"
   IO:print "Version : ${txtInfo}v$script_version${txtReset} (${txtWarn}$script_modified${txtReset})"
-  IO:print "Purpose : ${txtInfo}reapeat and observe changes${txtReset}"
+  IO:print "Purpose : ${txtInfo}repeat a command until the output changes${txtReset}"
   echo -n  "Usage   : $script_basename"
   Option:config |
     awk '

@@ -28,7 +28,7 @@ or with `git`
 ```
 Program : rexec.sh  by peter@forret.com
 Version : v1.1.0 (2022-10-24 21:59)
-Purpose : reapeat and observe changes
+Purpose : repeat and observe changes
 Usage   : rexec.sh [-h] [-q] [-v] [-f] [-d] [-e] [-l <log_dir>] [-t <tmp_dir>] [-n <number>] [-w <wait>] <action> <command?>
 Flags, options and parameters:
     -h|--help        : [flag] show usage [default: off]
